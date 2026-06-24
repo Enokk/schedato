@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.Schedato" parent="android:Theme.Material.NoActionBar" />
+</resources>
