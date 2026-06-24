@@ -18,23 +18,31 @@ Ogni schermata è composta da tre elementi:
 |---|---|---|
 | **View** | `*Screen.kt` | Disegna lo stato. Non contiene logica. |
 | **ViewModel** | `*ViewModel.kt` | Contiene logica e stato UI. Sopravvive alla rotazione dello schermo. |
-| **Model** | *(da aggiungere)* | Repository, sorgenti dati esterne. |
+| **Model** | `*Repository.kt` + Room | Repository, sorgenti dati esterne. |
 
 Il ViewModel non ha riferimenti alla View: comunica solo esponendo uno `StateFlow`.
 
-## State Management: StateFlow
+## State Management: StateFlow + combine
 
-Lo stato di ogni schermata è modellato come un **data class** (`*UiState`) che contiene tutto ciò che la UI deve mostrare. Il ViewModel espone questo stato tramite `StateFlow`:
+Lo stato di ogni schermata è modellato come un **data class** (`*UiState`) che contiene tutto ciò che la UI deve mostrare. Il ViewModel espone questo stato tramite `StateFlow`.
+
+Quando lo stato deriva da più sorgenti (es. lista dal DB + visibilità di un dialog), si usa `combine` per fonderle in un unico flusso:
 
 ```kotlin
-// Privato e mutabile — solo il ViewModel può modificarlo
-private val _uiState = MutableStateFlow(HomeUiState())
-
-// Pubblico e in sola lettura — la UI può solo osservarlo
-val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+val uiState = combine(repository.characters, _showDialog) { characters, showDialog ->
+    HomeUiState(characters = characters, showNewCharacterDialog = showDialog)
+}.stateIn(
+    scope = viewModelScope,
+    started = SharingStarted.WhileSubscribed(5_000),
+    initialValue = HomeUiState()
+)
 ```
 
-La UI osserva il flusso con `collectAsStateWithLifecycle()`, che smette automaticamente di ascoltare quando la schermata non è visibile (risparmio batteria).
+`stateIn` con `WhileSubscribed(5_000)` mantiene il flusso attivo 5 secondi dopo l'ultima sottoscrizione, gestendo le rotazioni schermo senza rifare la query al DB.
+
+La UI osserva con `collectAsStateWithLifecycle()`, che smette automaticamente di ascoltare quando la schermata non è visibile (risparmio batteria).
+
+**Stato drag (solo UI):** lo stato del drag-to-delete non passa per il ViewModel perché è puramente visivo e non sopravvive alla rotazione. Viene gestito con `remember { mutableStateOf(...) }` locale alla composable.
 
 ## Navigazione: Navigation Compose
 
@@ -44,13 +52,28 @@ La navigazione tra schermate usa **Navigation Compose** (`androidx.navigation.co
 
 L'app ha una sola `Activity` (`MainActivity`). Compose e Navigation gestiscono internamente tutto il routing tra schermate, senza creare nuove Activity per ogni schermata (pattern obsoleto).
 
+## Persistenza: Room + KSP
+
+I dati vengono salvati in un database SQLite locale tramite **Room**. Il layer è così strutturato:
+
+- `*Entity.kt` — classe annotata `@Entity`, mappa una tabella. Separata dal domain model per disaccoppiare lo schema DB dal resto.
+- `*Dao.kt` — interfaccia annotata `@Dao` con le query (restituisce `Flow` per reattività automatica).
+- `AppDatabase.kt` — singleton `RoomDatabase`, creato in `SchedatoApplication`.
+- `*Repository.kt` — unico punto di accesso ai dati per i ViewModel; converte le entity nel domain model.
+
+**KSP** (Kotlin Symbol Processor) genera il codice boilerplate di Room a compile-time leggendo le annotazioni. Sostituisce il vecchio `kapt`.
+
+**Nota AGP 9.x:** è richiesta la property `android.disallowKotlinSourceSets=false` in `gradle.properties` perché KSP registra le sorgenti generate via `kotlin.sourceSets`, API non ancora supportata nativamente da AGP 9.x.
+
 ## Build
 
 | Voce | Valore |
 |---|---|
 | Android Gradle Plugin | 9.2.1 |
 | Kotlin | 2.1.0 |
+| KSP | 2.1.0-1.0.29 |
 | Compose BOM | 2024.12.01 |
+| Room | 2.7.1 |
 | Min SDK | 33 (Android 13) |
 | Target/Compile SDK | 36.1 (Android 16 QPR1) |
 
@@ -62,20 +85,30 @@ Il plugin `kotlin.android` non viene applicato separatamente perché AGP 9.x int
 
 ```
 app/src/main/java/dev/enokk/schedato/
+├── SchedatoApplication.kt         ← Application, espone db e repository
 ├── MainActivity.kt
+├── model/
+│   └── Character.kt               ← domain model
+├── data/
+│   ├── local/
+│   │   ├── AppDatabase.kt
+│   │   ├── CharacterDao.kt
+│   │   └── CharacterEntity.kt     ← entity Room + funzioni di mapping
+│   └── repository/
+│       └── CharacterRepository.kt
 └── ui/
     ├── theme/
     │   ├── Theme.kt
     │   └── Type.kt
     ├── navigation/
-    │   └── AppNavigation.kt       ← Routes + NavHost
+    │   └── AppNavigation.kt       ← Routes + NavHost + wiring ViewModel factory
     └── screens/
         └── <nome_schermata>/
             ├── <Nome>Screen.kt    ← @Composable, solo UI
             └── <Nome>ViewModel.kt ← logica + UiState
 ```
 
-Ogni nuova schermata segue questo stesso schema: una cartella dedicata con un file Screen e un file ViewModel.
+Ogni nuova schermata segue questo schema. Il ViewModel riceve il repository tramite factory (`viewModelFactory { initializer { ... } }`); la factory viene costruita in `AppNavigation` leggendo il repository da `SchedatoApplication`.
 
 ## Convenzioni
 
