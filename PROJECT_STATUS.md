@@ -27,6 +27,14 @@ L'obiettivo finale è avere un'app mobile che consenta di creare, consultare e a
 - Rilascio sul cestino → dialog di conferma prima di eliminare
 - Rilascio altrove → annulla il drag senza conseguenze
 
+### Navigazione e impostazioni
+
+- Barra superiore con titolo schermata e hamburger menu
+- Drawer di navigazione che scivola da sinistra (scrim semi-trasparente)
+- Schermata Impostazioni con selettore tema: Chiaro / Scuro / Sistema
+- La scelta del tema persiste tra le sessioni tramite DataStore Preferences
+- Il tema viene applicato globalmente prima del rendering di qualsiasi schermata
+
 ### Persistenza
 
 - I personaggi vengono salvati su database SQLite locale tramite Room

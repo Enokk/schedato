@@ -26,24 +26,36 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +73,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import dev.enokk.schedato.model.Character
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 // Stato locale del drag: tutto quello che serve per renderizzare la card "volante"
 // e rilevare se è sopra il cestino. Non va nel ViewModel perché è puro stato UI.
@@ -69,6 +82,7 @@ private data class DragState(
     val touchPoint: Offset  // posizione assoluta del dito (centra l'avatar e fa l'hit-test sul cestino)
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
@@ -77,10 +91,13 @@ fun HomeScreen(
     onDialogDismiss: () -> Unit,
     onDeleteRequested: (Character) -> Unit,
     onDeleteConfirmed: () -> Unit,
-    onDeleteDismissed: () -> Unit
+    onDeleteDismissed: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     var dragState by remember { mutableStateOf<DragState?>(null) }
     var trashBounds by remember { mutableStateOf(Rect.Zero) }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
     // derivedStateOf ricalcola solo quando dragState o trashBounds cambiano,
     // evitando ricomposizioni inutili su ogni frame del drag
@@ -91,9 +108,42 @@ fun HomeScreen(
         }
     }
 
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                    label = { Text("Impostazioni") },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            onNavigateToSettings()
+                        }
+                    }
+                )
+            }
+        }
+    ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
         Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Personaggi") },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+            },
             floatingActionButton = {
                 if (dragState == null) {
                     FloatingActionButton(onClick = onNewCharacterClick) {
@@ -193,6 +243,7 @@ fun HomeScreen(
                 )
             }
         }
+    }
     }
 
     // Dialog di conferma eliminazione

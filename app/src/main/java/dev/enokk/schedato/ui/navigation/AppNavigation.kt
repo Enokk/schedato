@@ -11,9 +11,12 @@ import androidx.navigation.compose.rememberNavController
 import dev.enokk.schedato.SchedatoApplication
 import dev.enokk.schedato.ui.screens.home.HomeScreen
 import dev.enokk.schedato.ui.screens.home.HomeViewModel
+import dev.enokk.schedato.ui.screens.settings.SettingsScreen
+import dev.enokk.schedato.ui.screens.settings.SettingsViewModel
 
 object Routes {
     const val HOME = "home"
+    const val SETTINGS = "settings"
 }
 
 @Composable
@@ -37,7 +40,19 @@ fun AppNavigation() {
                 onDialogDismiss = viewModel::onDialogDismiss,
                 onDeleteRequested = viewModel::onDeleteRequested,
                 onDeleteConfirmed = viewModel::onDeleteConfirmed,
-                onDeleteDismissed = viewModel::onDeleteDismissed
+                onDeleteDismissed = viewModel::onDeleteDismissed,
+                onNavigateToSettings = { navController.navigate(Routes.SETTINGS) }
+            )
+        }
+        composable(Routes.SETTINGS) {
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModel.factory(app.userPreferencesRepository)
+            )
+            val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
+            SettingsScreen(
+                appTheme = appTheme,
+                onThemeChange = viewModel::setTheme,
+                onBack = { navController.popBackStack() }
             )
         }
     }
