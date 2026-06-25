@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">Schedato</string>
+
+    <!-- Common -->
+    <string name="cancel">Annulla</string>
+    <string name="delete">Elimina</string>
+    <string name="create">Crea</string>
+    <string name="name">Nome</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_menu">Menu</string>
+    <string name="cd_back">Indietro</string>
+
+    <!-- Home screen -->
+    <string name="home_title">Personaggi</string>
+    <string name="home_fab_cd">Nuovo personaggio</string>
+    <string name="home_empty_title">Nessun personaggio</string>
+    <string name="home_empty_subtitle">Tocca + per crearne uno</string>
+    <string name="home_new_character_title">Nuovo personaggio</string>
+    <string name="home_delete_title">Elimina personaggio</string>
+    <string name="home_delete_message">Vuoi eliminare «%1$s»? L\'operazione è irreversibile.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_theme_section">Tema</string>
+    <string name="settings_language_section">Lingua</string>
+
+    <!-- Theme options -->
+    <string name="theme_light">Chiaro</string>
+    <string name="theme_dark">Scuro</string>
+    <string name="theme_system">Sistema</string>
+
+    <!-- Character card -->
+    <string name="character_level">Liv. %1$d</string>
+
+    <!-- Language options (native names; only System is localized) -->
+    <string name="language_system">Sistema</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_english">English</string>
+</resources>

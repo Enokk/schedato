@@ -73,6 +73,23 @@ Le impostazioni dell'utente (es. tema) vengono salvate tramite **DataStore Prefe
 - L'istanza del DataStore è creata come extension property su `Context` (pattern raccomandato da Google per garantire una sola istanza per processo).
 - Le preferenze sono lette in `MainActivity` e passate a `SchedatoTheme`, così il tema è applicato globalmente prima che qualsiasi schermata venga composta.
 
+## Localizzazione
+
+Tutte le stringhe UI sono esternalizzate in **string resources** (`res/values/strings.xml` per l'inglese, `res/values-it/strings.xml` per l'italiano). L'inglese è il default/fallback di Android: se il device usa una lingua non supportata, il sistema usa automaticamente `res/values/`.
+
+Le Composable leggono le stringhe con `stringResource(R.string.key)`. Per le stringhe con argomenti (es. nome del personaggio nel dialog di eliminazione) si usa `stringResource(R.string.key, arg)` con placeholder `%1$s` / `%1$d` nel file XML.
+
+Nelle liste opzioni (`themeOptions`, `languageOptions` in `SettingsScreen`), le label sono memorizzate come `@StringRes Int` (`R.string.*`) invece di `String` letterali, così la `private val` rimane a top-level (non riallocata ad ogni recomposizione) e la risoluzione in stringa avviene una volta sola dentro la Composable.
+
+**Cambio lingua a runtime** — gestito da `LocaleManager` (API Android 13, coincide con `minSdk`):
+
+- `LocaleRepository` wrappa `LocaleManager.applicationLocales` in get/set tipizzati sull'enum `AppLanguage`.
+- Quando l'utente seleziona una lingua, `LocaleManager` persiste la scelta automaticamente (nessun DataStore) e ricrea l'Activity, che si ricompone con i nuovi string resources.
+- `AppLanguage.SYSTEM` corrisponde a `LocaleList.getEmptyLocaleList()`, che rimuove l'override e torna alla lingua del device.
+- I nomi delle lingue (`Italiano`, `English`) sono intenzionalmente i loro nomi nativi in entrambi i file di stringhe; solo `Sistema`/`System` viene localizzato.
+
+Il manifest dichiara le lingue supportate con `android:localeConfig="@xml/locale_config"`, necessario affinché Android 13+ esponga il selettore lingua anche nelle Impostazioni di sistema dell'app.
+
 ## Tema
 
 Il tema dell'app è controllato dall'enum `AppTheme` (`LIGHT`, `DARK`, `SYSTEM`). `SchedatoTheme` riceve il valore corrente da `MainActivity`, che lo osserva dal repository tramite `collectAsStateWithLifecycle`. `SYSTEM` delega a `isSystemInDarkTheme()`, gli altri due forzano la palette corrispondente indipendentemente dal sistema.
@@ -98,11 +115,12 @@ Il plugin `kotlin.android` non viene applicato separatamente perché AGP 9.x int
 
 ```
 app/src/main/java/dev/enokk/schedato/
-├── SchedatoApplication.kt         ← Application, espone db e repository
+├── SchedatoApplication.kt         ← Application, espone db, repository e localeRepository
 ├── MainActivity.kt
 ├── model/
 │   ├── Character.kt               ← domain model
-│   └── AppTheme.kt                ← enum per la scelta del tema
+│   ├── AppTheme.kt                ← enum per la scelta del tema
+│   └── AppLanguage.kt             ← enum per la scelta della lingua (+ BCP-47 tag)
 ├── data/
 │   ├── local/
 │   │   ├── AppDatabase.kt
@@ -110,7 +128,8 @@ app/src/main/java/dev/enokk/schedato/
 │   │   └── CharacterEntity.kt     ← entity Room + funzioni di mapping
 │   └── repository/
 │       ├── CharacterRepository.kt
-│       └── UserPreferencesRepository.kt ← DataStore per le preferenze
+│       ├── UserPreferencesRepository.kt ← DataStore per le preferenze
+│       └── LocaleRepository.kt    ← wrapper su LocaleManager per il cambio lingua
 └── ui/
     ├── theme/
     │   ├── Theme.kt

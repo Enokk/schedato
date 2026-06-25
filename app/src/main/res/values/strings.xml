@@ -1,3 +1,40 @@
 <resources>
     <string name="app_name">Schedato</string>
+
+    <!-- Common -->
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="create">Create</string>
+    <string name="name">Name</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_menu">Menu</string>
+    <string name="cd_back">Back</string>
+
+    <!-- Home screen -->
+    <string name="home_title">Characters</string>
+    <string name="home_fab_cd">New character</string>
+    <string name="home_empty_title">No characters</string>
+    <string name="home_empty_subtitle">Tap + to create one</string>
+    <string name="home_new_character_title">New character</string>
+    <string name="home_delete_title">Delete character</string>
+    <string name="home_delete_message">Delete «%1$s»? This cannot be undone.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme_section">Theme</string>
+    <string name="settings_language_section">Language</string>
+
+    <!-- Theme options -->
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
+
+    <!-- Character card -->
+    <string name="character_level">Lv. %1$d</string>
+
+    <!-- Language options (native names; only System is localized) -->
+    <string name="language_system">System</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_english">English</string>
 </resources>

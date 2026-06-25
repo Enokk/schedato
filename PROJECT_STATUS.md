@@ -34,6 +34,9 @@ L'obiettivo finale è avere un'app mobile che consenta di creare, consultare e a
 - Schermata Impostazioni con selettore tema: Chiaro / Scuro / Sistema
 - La scelta del tema persiste tra le sessioni tramite DataStore Preferences
 - Il tema viene applicato globalmente prima del rendering di qualsiasi schermata
+- Selettore lingua in Impostazioni: Sistema / Italiano / English
+- La lingua persiste automaticamente tramite `LocaleManager` (Android 13+); nessun DataStore necessario
+- "Sistema" usa la lingua del device con fallback su inglese
 
 ### Persistenza
 

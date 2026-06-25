@@ -46,12 +46,15 @@ fun AppNavigation() {
         }
         composable(Routes.SETTINGS) {
             val viewModel: SettingsViewModel = viewModel(
-                factory = SettingsViewModel.factory(app.userPreferencesRepository)
+                factory = SettingsViewModel.factory(app.userPreferencesRepository, app.localeRepository)
             )
             val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
+            val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
             SettingsScreen(
                 appTheme = appTheme,
                 onThemeChange = viewModel::setTheme,
+                appLanguage = appLanguage,
+                onLanguageChange = viewModel::setLanguage,
                 onBack = { navController.popBackStack() }
             )
         }

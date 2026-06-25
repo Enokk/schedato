@@ -71,6 +71,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import dev.enokk.schedato.R
 import dev.enokk.schedato.model.Character
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -114,7 +116,7 @@ fun HomeScreen(
             ModalDrawerSheet {
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    label = { Text("Impostazioni") },
+                    label = { Text(stringResource(R.string.settings_title)) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -131,10 +133,10 @@ fun HomeScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Personaggi") },
+                    title = { Text(stringResource(R.string.home_title)) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.cd_menu))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -147,7 +149,7 @@ fun HomeScreen(
             floatingActionButton = {
                 if (dragState == null) {
                     FloatingActionButton(onClick = onNewCharacterClick) {
-                        Icon(Icons.Default.Add, contentDescription = "Nuovo personaggio")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.home_fab_cd))
                     }
                 }
             }
@@ -250,15 +252,15 @@ fun HomeScreen(
     uiState.characterPendingDelete?.let { character ->
         AlertDialog(
             onDismissRequest = onDeleteDismissed,
-            title = { Text("Elimina personaggio") },
-            text = { Text("Vuoi eliminare «${character.name}»? L'operazione è irreversibile.") },
+            title = { Text(stringResource(R.string.home_delete_title)) },
+            text = { Text(stringResource(R.string.home_delete_message, character.name)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text("Elimina", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDeleteDismissed) { Text("Annulla") }
+                TextButton(onClick = onDeleteDismissed) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -344,7 +346,7 @@ private fun TrashZone(
                 modifier = Modifier.size(iconSize)
             )
             Text(
-                text = "Elimina",
+                text = stringResource(R.string.delete),
                 color = contentColor,
                 style = MaterialTheme.typography.labelMedium
             )
@@ -398,7 +400,7 @@ private fun CharacterCard(
             )
             AssistChip(
                 onClick = {},
-                label = { Text("Liv. ${character.level}") }
+                label = { Text(stringResource(R.string.character_level, character.level)) }
             )
         }
     }
@@ -411,9 +413,9 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = "Nessun personaggio", style = MaterialTheme.typography.titleMedium)
+        Text(text = stringResource(R.string.home_empty_title), style = MaterialTheme.typography.titleMedium)
         Text(
-            text = "Tocca + per crearne uno",
+            text = stringResource(R.string.home_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -426,22 +428,22 @@ private fun NewCharacterDialog(onConfirm: (String) -> Unit, onDismiss: () -> Uni
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuovo personaggio") },
+        title = { Text(stringResource(R.string.home_new_character_title)) },
         text = {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nome") },
+                label = { Text(stringResource(R.string.name)) },
                 singleLine = true
             )
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) {
-                Text("Crea")
+                Text(stringResource(R.string.create))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Annulla") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }

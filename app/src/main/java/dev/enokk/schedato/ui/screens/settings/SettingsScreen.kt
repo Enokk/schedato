@@ -20,13 +20,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.enokk.schedato.R
+import dev.enokk.schedato.model.AppLanguage
 import dev.enokk.schedato.model.AppTheme
 
 private val themeOptions = listOf(
-    AppTheme.LIGHT to "Chiaro",
-    AppTheme.DARK to "Scuro",
-    AppTheme.SYSTEM to "Sistema"
+    AppTheme.LIGHT to R.string.theme_light,
+    AppTheme.DARK to R.string.theme_dark,
+    AppTheme.SYSTEM to R.string.theme_system
+)
+
+private val languageOptions = listOf(
+    AppLanguage.SYSTEM to R.string.language_system,
+    AppLanguage.ITALIAN to R.string.language_italian,
+    AppLanguage.ENGLISH to R.string.language_english
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,18 +43,19 @@ private val themeOptions = listOf(
 fun SettingsScreen(
     appTheme: AppTheme,
     onThemeChange: (AppTheme) -> Unit,
+    appLanguage: AppLanguage,
+    onLanguageChange: (AppLanguage) -> Unit,
     onBack: () -> Unit
 ) {
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Impostazioni") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Indietro"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -65,18 +75,34 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Tema",
+                text = stringResource(R.string.settings_theme_section),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary
             )
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                themeOptions.forEachIndexed { index, (theme, displayName) ->
+                themeOptions.forEachIndexed { index, (theme, labelRes) ->
                     SegmentedButton(
                         shape = SegmentedButtonDefaults.itemShape(index = index, count = themeOptions.size),
                         selected = appTheme == theme,
                         onClick = { onThemeChange(theme) }
                     ) {
-                        Text(displayName)
+                        Text(stringResource(labelRes))
+                    }
+                }
+            }
+            Text(
+                text = stringResource(R.string.settings_language_section),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                languageOptions.forEachIndexed { index, (language, labelRes) ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = languageOptions.size),
+                        selected = appLanguage == language,
+                        onClick = { onLanguageChange(language) }
+                    ) {
+                        Text(stringResource(labelRes))
                     }
                 }
             }
