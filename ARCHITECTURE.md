@@ -26,11 +26,11 @@ Il ViewModel non ha riferimenti alla View: comunica solo esponendo uno `StateFlo
 
 Lo stato di ogni schermata è modellato come un **data class** (`*UiState`) che contiene tutto ciò che la UI deve mostrare. Il ViewModel espone questo stato tramite `StateFlow`.
 
-Quando lo stato deriva da più sorgenti (es. lista dal DB + visibilità di un dialog), si usa `combine` per fonderle in un unico flusso:
+Quando lo stato deriva da più sorgenti (es. lista dal DB + stato di un dialog di conferma), si usa `combine` per fonderle in un unico flusso:
 
 ```kotlin
-val uiState = combine(repository.characters, _showDialog) { characters, showDialog ->
-    HomeUiState(characters = characters, showNewCharacterDialog = showDialog)
+val uiState = combine(repository.characters, _characterPendingDelete) { characters, pendingDelete ->
+    HomeUiState(characters = characters, characterPendingDelete = pendingDelete)
 }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(5_000),
@@ -81,6 +81,8 @@ Le Composable leggono le stringhe con `stringResource(R.string.key)`. Per le str
 
 Nelle liste opzioni (`themeOptions`, `languageOptions` in `SettingsScreen`), le label sono memorizzate come `@StringRes Int` (`R.string.*`) invece di `String` letterali, così la `private val` rimane a top-level (non riallocata ad ogni recomposizione) e la risoluzione in stringa avviene una volta sola dentro la Composable.
 
+Gli enum di dominio che hanno una rappresentazione UI (`AppRace`, `AppClass`) portano direttamente la proprietà `@StringRes val labelRes: Int`. Il mapping enum → stringa è definito una volta sola sull'enum e riutilizzato ovunque (picker di selezione, card della lista) senza duplicare le liste.
+
 **Cambio lingua a runtime** — gestito da `LocaleManager` (API Android 13, coincide con `minSdk`):
 
 - `LocaleRepository` wrappa `LocaleManager.applicationLocales` in get/set tipizzati sull'enum `AppLanguage`.
@@ -120,7 +122,9 @@ app/src/main/java/dev/enokk/schedato/
 ├── model/
 │   ├── Character.kt               ← domain model
 │   ├── AppTheme.kt                ← enum per la scelta del tema
-│   └── AppLanguage.kt             ← enum per la scelta della lingua (+ BCP-47 tag)
+│   ├── AppLanguage.kt             ← enum per la scelta della lingua (+ BCP-47 tag)
+│   ├── AppRace.kt                 ← enum razze PHB 5e con @StringRes labelRes
+│   └── AppClass.kt                ← enum classi PHB 5e con @StringRes labelRes
 ├── data/
 │   ├── local/
 │   │   ├── AppDatabase.kt
@@ -137,9 +141,15 @@ app/src/main/java/dev/enokk/schedato/
     ├── navigation/
     │   └── AppNavigation.kt       ← Routes + NavHost + wiring ViewModel factory
     └── screens/
-        └── <nome_schermata>/
-            ├── <Nome>Screen.kt    ← @Composable, solo UI
-            └── <Nome>ViewModel.kt ← logica + UiState
+        ├── home/
+        │   ├── HomeScreen.kt
+        │   └── HomeViewModel.kt
+        ├── settings/
+        │   ├── SettingsScreen.kt
+        │   └── SettingsViewModel.kt
+        └── characterdetail/
+            ├── CharacterDetailScreen.kt  ← crea e modifica personaggio
+            └── CharacterDetailViewModel.kt
 ```
 
 Ogni nuova schermata segue questo schema. Il ViewModel riceve il repository tramite factory (`viewModelFactory { initializer { ... } }`); la factory viene costruita in `AppNavigation` leggendo il repository da `SchedatoApplication`.

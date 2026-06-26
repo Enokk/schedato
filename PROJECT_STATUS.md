@@ -14,9 +14,9 @@ L'obiettivo finale è avere un'app mobile che consenta di creare, consultare e a
 
 - Griglia a 2 colonne di card personaggio (larghezza fissa, centrate)
 - Stato vuoto con messaggio esplicativo quando non ci sono personaggi
-- FAB "+" per creare un nuovo personaggio
-- Dialog di creazione con campo nome e validazione (conferma disabilitata se vuoto)
-- Card con: avatar (icona), nome, razza, classe, livello
+- FAB "+" per navigare alla schermata di creazione personaggio
+- Tap su una card → navigazione alla schermata di modifica del personaggio
+- Card con: avatar (icona), nome, razza e classe localizzate, livello
 
 ### Eliminazione personaggio
 
@@ -37,6 +37,15 @@ L'obiettivo finale è avere un'app mobile che consenta di creare, consultare e a
 - Selettore lingua in Impostazioni: Sistema / Italiano / English
 - La lingua persiste automaticamente tramite `LocaleManager` (Android 13+); nessun DataStore necessario
 - "Sistema" usa la lingua del device con fallback su inglese
+
+### Schermata dettaglio personaggio (crea / modifica)
+
+- Stessa schermata usata sia per la creazione che per la modifica (modalità distinte)
+- Campo nome con validazione (salvataggio disabilitato se vuoto)
+- Selezione razza: dialog con lista scrollabile, scrollbar visiva, indicatore voce selezionata, scroll automatico all'elemento corrente; 15 voci (razze + sottorazze PHB 5e)
+- Selezione classe: stesso componente picker, 12 classi PHB 5e
+- Stepper livello (+/−, range 1–20)
+- Salvataggio tramite `@Upsert`: crea il personaggio se nuovo, aggiorna se esistente
 
 ### Persistenza
 
@@ -61,7 +70,5 @@ Quando si tocca una card dalla lista, si dovrebbe aprire la scheda completa del 
 - **Note libere**
 
 ### Funzionalità generali ancora mancanti
-- Modifica del nome e altri dati del personaggio dopo la creazione
-- Selezione razza e classe al momento della creazione (attualmente sono placeholder "—")
-- Avanzamento di livello
+- Avanzamento di livello con conseguenze meccaniche (HP, competenze, ecc.)
 - Eventuale import/export della scheda (JSON o PDF)

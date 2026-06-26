@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +43,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -73,6 +73,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import dev.enokk.schedato.R
+import dev.enokk.schedato.model.AppClass
+import dev.enokk.schedato.model.AppRace
 import dev.enokk.schedato.model.Character
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -89,8 +91,7 @@ private data class DragState(
 fun HomeScreen(
     uiState: HomeUiState,
     onNewCharacterClick: () -> Unit,
-    onNewCharacterConfirm: (String) -> Unit,
-    onDialogDismiss: () -> Unit,
+    onCharacterClick: (Character) -> Unit,
     onDeleteRequested: (Character) -> Unit,
     onDeleteConfirmed: () -> Unit,
     onDeleteDismissed: () -> Unit,
@@ -173,6 +174,7 @@ fun HomeScreen(
                             DraggableCharacterCard(
                                 character = character,
                                 isBeingDragged = dragState?.character?.id == character.id,
+                                onClick = { onCharacterClick(character) },
                                 onDragStart = { touchPoint ->
                                     dragState = DragState(character, touchPoint)
                                 },
@@ -264,21 +266,15 @@ fun HomeScreen(
             }
         )
     }
-
-    if (uiState.showNewCharacterDialog) {
-        NewCharacterDialog(
-            onConfirm = onNewCharacterConfirm,
-            onDismiss = onDialogDismiss
-        )
-    }
 }
 
-// Wrapper che aggiunge long-press + drag a qualsiasi CharacterCard.
+// Wrapper che aggiunge tap, long-press e drag a qualsiasi CharacterCard.
 // Registra la posizione della card sullo schermo e passa le coordinate al genitore.
 @Composable
 private fun DraggableCharacterCard(
     character: Character,
     isBeingDragged: Boolean,
+    onClick: () -> Unit,
     onDragStart: (touchPoint: Offset) -> Unit,
     onDrag: (Offset) -> Unit,
     onDragEnd: () -> Unit,
@@ -291,6 +287,7 @@ private fun DraggableCharacterCard(
             .onGloballyPositioned { coords ->
                 cardTopLeft = coords.positionInWindow()
             }
+            .clickable { onClick() }
             .pointerInput(character.id) {
                 detectDragGesturesAfterLongPress(
                     onDragStart = { touchInCard ->
@@ -393,8 +390,12 @@ private fun CharacterCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            val raceLabel = AppRace.entries.find { it.name == character.race }
+                ?.let { stringResource(it.labelRes) } ?: character.race
+            val classLabel = AppClass.entries.find { it.name == character.characterClass }
+                ?.let { stringResource(it.labelRes) } ?: character.characterClass
             Text(
-                text = "${character.race} • ${character.characterClass}",
+                text = "$raceLabel • $classLabel",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -422,28 +423,3 @@ private fun EmptyState(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-private fun NewCharacterDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
-    var name by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.home_new_character_title)) },
-        text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text(stringResource(R.string.name)) },
-                singleLine = true
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) {
-                Text(stringResource(R.string.create))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
-        }
-    )
-}

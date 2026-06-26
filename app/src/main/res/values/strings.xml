@@ -33,6 +33,43 @@
     <!-- Character card -->
     <string name="character_level">Lv. %1$d</string>
 
+    <!-- Character detail screen -->
+    <string name="detail_label_race">Race</string>
+    <string name="detail_label_class">Class</string>
+    <string name="detail_label_level">Level</string>
+    <string name="detail_save">Save</string>
+
+    <!-- D&D races -->
+    <string name="race_dragonborn">Dragonborn</string>
+    <string name="race_dwarf_hill">Hill Dwarf</string>
+    <string name="race_dwarf_mountain">Mountain Dwarf</string>
+    <string name="race_elf_high">High Elf</string>
+    <string name="race_elf_wood">Wood Elf</string>
+    <string name="race_elf_dark">Dark Elf (Drow)</string>
+    <string name="race_gnome_forest">Forest Gnome</string>
+    <string name="race_gnome_rock">Rock Gnome</string>
+    <string name="race_half_elf">Half-Elf</string>
+    <string name="race_half_orc">Half-Orc</string>
+    <string name="race_halfling_lightfoot">Lightfoot Halfling</string>
+    <string name="race_halfling_stout">Stout Halfling</string>
+    <string name="race_human_standard">Standard Human</string>
+    <string name="race_human_variant">Variant Human</string>
+    <string name="race_tiefling">Tiefling</string>
+
+    <!-- D&D classes -->
+    <string name="class_barbarian">Barbarian</string>
+    <string name="class_bard">Bard</string>
+    <string name="class_cleric">Cleric</string>
+    <string name="class_druid">Druid</string>
+    <string name="class_fighter">Fighter</string>
+    <string name="class_monk">Monk</string>
+    <string name="class_paladin">Paladin</string>
+    <string name="class_ranger">Ranger</string>
+    <string name="class_rogue">Rogue</string>
+    <string name="class_sorcerer">Sorcerer</string>
+    <string name="class_warlock">Warlock</string>
+    <string name="class_wizard">Wizard</string>
+
     <!-- Language options (native names; only System is localized) -->
     <string name="language_system">System</string>
     <string name="language_italian">Italiano</string>

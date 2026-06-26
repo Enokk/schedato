@@ -33,6 +33,43 @@
     <!-- Character card -->
     <string name="character_level">Liv. %1$d</string>
 
+    <!-- Character detail screen -->
+    <string name="detail_label_race">Razza</string>
+    <string name="detail_label_class">Classe</string>
+    <string name="detail_label_level">Livello</string>
+    <string name="detail_save">Salva</string>
+
+    <!-- Razze D&D -->
+    <string name="race_dragonborn">Draconico</string>
+    <string name="race_dwarf_hill">Nano delle Colline</string>
+    <string name="race_dwarf_mountain">Nano della Montagna</string>
+    <string name="race_elf_high">Alto Elfo</string>
+    <string name="race_elf_wood">Elfo dei Boschi</string>
+    <string name="race_elf_dark">Elfo Oscuro (Drow)</string>
+    <string name="race_gnome_forest">Gnomo della Foresta</string>
+    <string name="race_gnome_rock">Gnomo della Roccia</string>
+    <string name="race_half_elf">Mezzelfo</string>
+    <string name="race_half_orc">Mezzorco</string>
+    <string name="race_halfling_lightfoot">Halfling Piediveloci</string>
+    <string name="race_halfling_stout">Halfling Tarchiato</string>
+    <string name="race_human_standard">Umano Standard</string>
+    <string name="race_human_variant">Umano Variante</string>
+    <string name="race_tiefling">Tiefling</string>
+
+    <!-- Classi D&D -->
+    <string name="class_barbarian">Barbaro</string>
+    <string name="class_bard">Bardo</string>
+    <string name="class_cleric">Chierico</string>
+    <string name="class_druid">Druido</string>
+    <string name="class_fighter">Guerriero</string>
+    <string name="class_monk">Monaco</string>
+    <string name="class_paladin">Paladino</string>
+    <string name="class_ranger">Ranger</string>
+    <string name="class_rogue">Ladro</string>
+    <string name="class_sorcerer">Stregone</string>
+    <string name="class_warlock">Warlock</string>
+    <string name="class_wizard">Mago</string>
+
     <!-- Language options (native names; only System is localized) -->
     <string name="language_system">Sistema</string>
     <string name="language_italian">Italiano</string>
