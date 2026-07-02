@@ -33,6 +33,18 @@
     <!-- Character card -->
     <string name="character_level">Lv. %1$d</string>
 
+    <!-- Race picker screen -->
+    <string name="race_picker_title">Choose your race</string>
+    <string name="race_group_human">Human</string>
+    <string name="race_group_elf">Elf</string>
+    <string name="race_group_dwarf">Dwarf</string>
+    <string name="race_group_halfling">Halfling</string>
+    <string name="race_group_gnome">Gnome</string>
+
+    <!-- Class picker screen -->
+    <string name="class_picker_title">Choose your class</string>
+    <string name="next">Next</string>
+
     <!-- Character detail screen -->
     <string name="detail_label_race">Race</string>
     <string name="detail_label_class">Class</string>

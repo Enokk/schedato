@@ -33,6 +33,18 @@
     <!-- Character card -->
     <string name="character_level">Liv. %1$d</string>
 
+    <!-- Schermata scelta razza -->
+    <string name="race_picker_title">Scegli la tua razza</string>
+    <string name="race_group_human">Umano</string>
+    <string name="race_group_elf">Elfo</string>
+    <string name="race_group_dwarf">Nano</string>
+    <string name="race_group_halfling">Halfling</string>
+    <string name="race_group_gnome">Gnomo</string>
+
+    <!-- Schermata scelta classe -->
+    <string name="class_picker_title">Scegli la tua classe</string>
+    <string name="next">Avanti</string>
+
     <!-- Character detail screen -->
     <string name="detail_label_race">Razza</string>
     <string name="detail_label_class">Classe</string>
@@ -40,18 +52,18 @@
     <string name="detail_save">Salva</string>
 
     <!-- Razze D&D -->
-    <string name="race_dragonborn">Draconico</string>
+    <string name="race_dragonborn">Draconide</string>
     <string name="race_dwarf_hill">Nano delle Colline</string>
-    <string name="race_dwarf_mountain">Nano della Montagna</string>
-    <string name="race_elf_high">Alto Elfo</string>
+    <string name="race_dwarf_mountain">Nano delle Montagne</string>
+    <string name="race_elf_high">Elfo Alto</string>
     <string name="race_elf_wood">Elfo dei Boschi</string>
     <string name="race_elf_dark">Elfo Oscuro (Drow)</string>
-    <string name="race_gnome_forest">Gnomo della Foresta</string>
-    <string name="race_gnome_rock">Gnomo della Roccia</string>
+    <string name="race_gnome_forest">Gnomo delle Foreste</string>
+    <string name="race_gnome_rock">Gnomo delle Rocce</string>
     <string name="race_half_elf">Mezzelfo</string>
     <string name="race_half_orc">Mezzorco</string>
-    <string name="race_halfling_lightfoot">Halfling Piediveloci</string>
-    <string name="race_halfling_stout">Halfling Tarchiato</string>
+    <string name="race_halfling_lightfoot">Halfling Piedelesto</string>
+    <string name="race_halfling_stout">Halfling Tozzo</string>
     <string name="race_human_standard">Umano Standard</string>
     <string name="race_human_variant">Umano Variante</string>
     <string name="race_tiefling">Tiefling</string>

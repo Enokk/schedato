@@ -48,6 +48,25 @@ La UI osserva con `collectAsStateWithLifecycle()`, che smette automaticamente di
 
 La navigazione tra schermate usa **Navigation Compose** (`androidx.navigation.compose`). Tutte le destinazioni sono definite come costanti in `ui/navigation/AppNavigation.kt` nell'oggetto `Routes`, per evitare stringhe magiche sparse nel codice.
 
+### Creazione personaggio: flow multi-step
+
+La creazione di un nuovo personaggio non passa direttamente per `CHARACTER_CREATE`, ma segue un flow a tre schermate concatenate via argomenti di rotta:
+
+```
+RACE_PICKER → CLASS_PICKER/{raceName} → CHARACTER_CREATE/{raceName}/{className}
+```
+
+- `RacePickerScreen`/`RacePickerViewModel` e `ClassPickerScreen`/`ClassPickerViewModel` sono ViewModel "puri" (senza repository): il loro `uiState` esiste solo per la selezione in corso e non viene persistito finché non si arriva alla creazione vera e propria.
+- `race`/`class` scelti vengono passati come segmenti di path (`Routes.classPickerRoute(raceName)`, `Routes.characterCreate(raceName, className)`) e risolti a `AppRace`/`AppClass` in `AppNavigation` prima di essere passati come `initialRace`/`initialClass` alla factory di `CharacterDetailViewModel`.
+- In modalità creazione (`uiState.isCreateMode`), `CharacterDetailScreen` mostra razza e classe come badge di sola lettura (`SelectionBadge`, con immagine + label) invece del `PickerField` modificabile usato in modifica: la scelta è già stata fatta nei due step precedenti.
+
+### Raggruppamento razze: `RaceGroup`
+
+`AppRace` include varianti (es. `ELF_HIGH`/`ELF_WOOD`/`ELF_DARK`) che nella UI di selezione vanno presentate come un'unica card per non affollare la griglia. `model/RaceGroup.kt` definisce `RaceGroup` (label + immagine + lista di `AppRace`) e la costante `RACE_GROUPS`:
+
+- Se il gruppo contiene una sola razza, il tap seleziona direttamente quella (`RacePickerViewModel.onGroupClick`).
+- Se il gruppo contiene più razze, il tap apre un dialog (`SubRaceDialog`) con la lista delle sottorazze.
+
 ## Pattern: Single Activity
 
 L'app ha una sola `Activity` (`MainActivity`). Compose e Navigation gestiscono internamente tutto il routing tra schermate, senza creare nuove Activity per ogni schermata (pattern obsoleto).
@@ -81,7 +100,9 @@ Le Composable leggono le stringhe con `stringResource(R.string.key)`. Per le str
 
 Nelle liste opzioni (`themeOptions`, `languageOptions` in `SettingsScreen`), le label sono memorizzate come `@StringRes Int` (`R.string.*`) invece di `String` letterali, così la `private val` rimane a top-level (non riallocata ad ogni recomposizione) e la risoluzione in stringa avviene una volta sola dentro la Composable.
 
-Gli enum di dominio che hanno una rappresentazione UI (`AppRace`, `AppClass`) portano direttamente la proprietà `@StringRes val labelRes: Int`. Il mapping enum → stringa è definito una volta sola sull'enum e riutilizzato ovunque (picker di selezione, card della lista) senza duplicare le liste.
+Gli enum di dominio che hanno una rappresentazione UI (`AppRace`, `AppClass`) portano direttamente le proprietà `@StringRes val labelRes: Int` e `@DrawableRes val drawableRes: Int`. Il mapping enum → stringa/immagine è definito una volta sola sull'enum e riutilizzato ovunque (picker di selezione, card della lista, badge di riepilogo) senza duplicare le liste.
+
+**Kotlin compiler flag `-Xannotation-default-target=param-property`** (in `app/build.gradle.kts`): anticipa il futuro default di Kotlin (KT-73255) applicando le annotazioni sui parametri delle primary constructor property anche al field generato, non solo al parametro. Necessario per evitare warning su `@StringRes`/`@DrawableRes` in `AppRace`/`AppClass`.
 
 **Cambio lingua a runtime** — gestito da `LocaleManager` (API Android 13, coincide con `minSdk`):
 
@@ -123,8 +144,9 @@ app/src/main/java/dev/enokk/schedato/
 │   ├── Character.kt               ← domain model
 │   ├── AppTheme.kt                ← enum per la scelta del tema
 │   ├── AppLanguage.kt             ← enum per la scelta della lingua (+ BCP-47 tag)
-│   ├── AppRace.kt                 ← enum razze PHB 5e con @StringRes labelRes
-│   └── AppClass.kt                ← enum classi PHB 5e con @StringRes labelRes
+│   ├── AppRace.kt                 ← enum razze PHB 5e con labelRes + drawableRes
+│   ├── AppClass.kt                ← enum classi PHB 5e con labelRes + drawableRes
+│   └── RaceGroup.kt               ← raggruppa le sottorazze per il race picker (RACE_GROUPS)
 ├── data/
 │   ├── local/
 │   │   ├── AppDatabase.kt
@@ -147,6 +169,12 @@ app/src/main/java/dev/enokk/schedato/
         ├── settings/
         │   ├── SettingsScreen.kt
         │   └── SettingsViewModel.kt
+        ├── racepicker/
+        │   ├── RacePickerScreen.kt    ← griglia gruppi razza + dialog sottorazze
+        │   └── RacePickerViewModel.kt
+        ├── classpicker/
+        │   ├── ClassPickerScreen.kt   ← griglia classi
+        │   └── ClassPickerViewModel.kt
         └── characterdetail/
             ├── CharacterDetailScreen.kt  ← crea e modifica personaggio
             └── CharacterDetailViewModel.kt

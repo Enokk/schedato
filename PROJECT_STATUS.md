@@ -14,7 +14,7 @@ L'obiettivo finale è avere un'app mobile che consenta di creare, consultare e a
 
 - Griglia a 2 colonne di card personaggio (larghezza fissa, centrate)
 - Stato vuoto con messaggio esplicativo quando non ci sono personaggi
-- FAB "+" per navigare alla schermata di creazione personaggio
+- FAB "+" per avviare il flow di creazione personaggio (scelta razza → classe → dettaglio)
 - Tap su una card → navigazione alla schermata di modifica del personaggio
 - Card con: avatar (icona), nome, razza e classe localizzate, livello
 
@@ -38,12 +38,20 @@ L'obiettivo finale è avere un'app mobile che consenta di creare, consultare e a
 - La lingua persiste automaticamente tramite `LocaleManager` (Android 13+); nessun DataStore necessario
 - "Sistema" usa la lingua del device con fallback su inglese
 
+### Creazione personaggio: selezione razza e classe
+
+- Flow a step dedicati prima della schermata di dettaglio: scelta razza → scelta classe → dettaglio (nome, livello, salvataggio)
+- Schermata razza: griglia di card con immagine, raggruppa le varianti (es. Elfo Alto/Silvano/Scuro) in un'unica card; se il gruppo ha più sottorazze si apre un dialog di scelta
+- Schermata classe: griglia di card con immagine, una per classe (12 classi PHB 5e)
+- Card selezionata evidenziata (bordo + badge di spunta); pulsante "Avanti" abilitato solo dopo una selezione
+- Nella schermata di dettaglio, in modalità creazione razza e classe sono mostrate come badge di sola lettura con immagine (non più modificabili in questo step)
+
 ### Schermata dettaglio personaggio (crea / modifica)
 
 - Stessa schermata usata sia per la creazione che per la modifica (modalità distinte)
 - Campo nome con validazione (salvataggio disabilitato se vuoto)
-- Selezione razza: dialog con lista scrollabile, scrollbar visiva, indicatore voce selezionata, scroll automatico all'elemento corrente; 15 voci (razze + sottorazze PHB 5e)
-- Selezione classe: stesso componente picker, 12 classi PHB 5e
+- In modifica: selezione razza/classe tramite dialog con lista scrollabile, scrollbar visiva, indicatore voce selezionata, scroll automatico all'elemento corrente; 15 voci razza (razze + sottorazze PHB 5e), 12 voci classe
+- In creazione: razza e classe arrivano già scelte dagli step precedenti (vedi sopra)
 - Stepper livello (+/−, range 1–20)
 - Salvataggio tramite `@Upsert`: crea il personaggio se nuovo, aggiorna se esistente
 

@@ -6,17 +6,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,13 +49,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.Image
 import dev.enokk.schedato.R
 import dev.enokk.schedato.model.AppClass
 import dev.enokk.schedato.model.AppRace
@@ -71,10 +78,11 @@ fun CharacterDetailScreen(
     onClassChange: (AppClass?) -> Unit,
     onLevelChange: (Int) -> Unit,
     onSave: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSaved: () -> Unit = onBack
 ) {
     LaunchedEffect(uiState.isSaved) {
-        if (uiState.isSaved) onBack()
+        if (uiState.isSaved) onSaved()
     }
 
     Scaffold(
@@ -115,18 +123,42 @@ fun CharacterDetailScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
             )
-            PickerField(
-                selectedOption = uiState.race,
-                options = raceOptions,
-                labelRes = R.string.detail_label_race,
-                onOptionSelected = onRaceChange
-            )
-            PickerField(
-                selectedOption = uiState.characterClass,
-                options = classOptions,
-                labelRes = R.string.detail_label_class,
-                onOptionSelected = onClassChange
-            )
+            if (uiState.isCreateMode) {
+                uiState.race?.let { race ->
+                    SelectionBadge(
+                        drawableRes = race.drawableRes,
+                        label = stringResource(R.string.detail_label_race),
+                        value = stringResource(race.labelRes),
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            } else {
+                PickerField(
+                    selectedOption = uiState.race,
+                    options = raceOptions,
+                    labelRes = R.string.detail_label_race,
+                    onOptionSelected = onRaceChange
+                )
+            }
+            if (uiState.isCreateMode) {
+                uiState.characterClass?.let { cls ->
+                    SelectionBadge(
+                        drawableRes = cls.drawableRes,
+                        label = stringResource(R.string.detail_label_class),
+                        value = stringResource(cls.labelRes),
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            } else {
+                PickerField(
+                    selectedOption = uiState.characterClass,
+                    options = classOptions,
+                    labelRes = R.string.detail_label_class,
+                    onOptionSelected = onClassChange
+                )
+            }
             LevelStepper(
                 level = uiState.level,
                 onLevelChange = onLevelChange
@@ -250,24 +282,54 @@ private fun <T> PickerField(
     }
 }
 
-// Composable separato: legge lo state in contesto @Composable → recomposition corretta al scroll
+@Composable
+private fun SelectionBadge(
+    drawableRes: Int,
+    label: String,
+    value: String,
+    containerColor: androidx.compose.ui.graphics.Color,
+    contentColor: androidx.compose.ui.graphics.Color
+) {
+    Surface(color = containerColor, shape = MaterialTheme.shapes.medium) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(12.dp)
+        ) {
+            Image(
+                painter = painterResource(drawableRes),
+                contentDescription = null,
+                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(text = label, style = MaterialTheme.typography.labelSmall, color = contentColor)
+                Text(text = value, style = MaterialTheme.typography.titleMedium, color = contentColor)
+            }
+        }
+    }
+}
+
+// state.layoutInfo/firstVisibleItemIndex cambiano ad ogni frame di scroll: letti dentro
+// la draw scope di Canvas (non nel corpo del composable) causano solo redraw, non recomposition.
 @Composable
 private fun PickerScrollbar(
     state: LazyListState,
     modifier: Modifier = Modifier
 ) {
-    val totalItems = state.layoutInfo.totalItemsCount
-    val visibleItems = state.layoutInfo.visibleItemsInfo
-    if (totalItems == 0 || visibleItems.isEmpty()) return
-    val visibleFraction = visibleItems.size.toFloat() / totalItems
-    if (visibleFraction >= 1f) return
-
-    val firstIndex = state.firstVisibleItemIndex
-    val scrollFraction = firstIndex.toFloat() / (totalItems - visibleItems.size).coerceAtLeast(1)
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
     val thumbColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
 
     Canvas(modifier = modifier) {
+        val totalItems = state.layoutInfo.totalItemsCount
+        val visibleItems = state.layoutInfo.visibleItemsInfo
+        if (totalItems == 0 || visibleItems.isEmpty()) return@Canvas
+        val visibleFraction = visibleItems.size.toFloat() / totalItems
+        if (visibleFraction >= 1f) return@Canvas
+
+        val scrollFraction = state.firstVisibleItemIndex.toFloat() /
+            (totalItems - visibleItems.size).coerceAtLeast(1)
+
         drawRoundRect(color = trackColor, cornerRadius = CornerRadius(size.width / 2))
         val thumbHeight = (size.height * visibleFraction).coerceAtLeast(40f)
         val thumbTop = (scrollFraction * (size.height - thumbHeight))

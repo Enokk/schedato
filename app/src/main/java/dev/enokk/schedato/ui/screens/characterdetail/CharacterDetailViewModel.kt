@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 data class CharacterDetailUiState(
-    val originalName: String? = null,   // null = create mode; usato come titolo schermata
+    val isCreateMode: Boolean = false,
+    val originalName: String? = null,
     val name: String = "",
     val race: AppRace? = null,
     val characterClass: AppClass? = null,
@@ -26,18 +27,26 @@ data class CharacterDetailUiState(
 
 class CharacterDetailViewModel(
     private val repository: CharacterRepository,
-    private val characterId: String?        // null = create mode
+    private val characterId: String?,
+    private val initialRace: AppRace? = null,
+    private val initialClass: AppClass? = null
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CharacterDetailUiState())
+    private val _uiState = MutableStateFlow(
+        CharacterDetailUiState(
+            isCreateMode = characterId == null,
+            race = initialRace,
+            characterClass = initialClass
+        )
+    )
     val uiState: StateFlow<CharacterDetailUiState> = _uiState.asStateFlow()
 
     init {
         if (characterId != null) {
             viewModelScope.launch {
                 repository.getCharacterById(characterId)?.let { character ->
-                    _uiState.update {
-                        it.copy(
+                    _uiState.update { state ->
+                        state.copy(
                             originalName = character.name,
                             name = character.name,
                             race = AppRace.entries.find { it.name == character.race },
@@ -73,8 +82,13 @@ class CharacterDetailViewModel(
     }
 
     companion object {
-        fun factory(repository: CharacterRepository, characterId: String?) = viewModelFactory {
-            initializer { CharacterDetailViewModel(repository, characterId) }
+        fun factory(
+            repository: CharacterRepository,
+            characterId: String?,
+            initialRace: AppRace? = null,
+            initialClass: AppClass? = null
+        ) = viewModelFactory {
+            initializer { CharacterDetailViewModel(repository, characterId, initialRace, initialClass) }
         }
     }
 }

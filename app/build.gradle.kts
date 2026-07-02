@@ -42,6 +42,15 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        // Anticipa il futuro default di Kotlin (KT-73255): applica le annotazioni sui
+        // parametri delle primary constructor property anche al field generato, non solo
+        // al parametro. Evita il warning su @StringRes/@DrawableRes in AppClass/AppRace.
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
